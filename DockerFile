@@ -1,25 +1,16 @@
-FROM tensorflow/tensorflow:1.4.1
+FROM python:3.7-buster
 
-# set up environment
-RUN mkdir ing
-WORKDIR /ing
+RUN python -m pip install numpy scipy matplotlib ipython jupyter pandas \
+sympy nose tabula-py PyMuPDF requests xlrd networkx wordcloud
 
-# setup python environment
-COPY ./requirements.txt .
-RUN pip install "--upgrade" pip --trusted-host pypi.python.org
-RUN pip install "--no-cache-dir" -r "requirements.txt" --trusted-host pypi.python.org
+RUN mkdir -p /home/docs
 
-# setup app
-COPY ./.env .
-COPY ./pipeline.yaml .
-COPY ./app.py .
-COPY ./run_ml.py .
-RUN mkdir src
-COPY ./src src
+WORKDIR /home/docs
 
-# entry point
-EXPOSE 8000
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY entrypoint.sh /
 
+RUN ["chmod", "+x", "/entrypoint.sh"]
 
+EXPOSE 8100/tcp
 
+ENTRYPOINT ["/entrypoint.sh"]
